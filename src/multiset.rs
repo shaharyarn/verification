@@ -4,6 +4,7 @@ use std::hash::Hash;
 use std::iter::FromIterator;
 use std::ops::{Add, Sub};
 
+#[derive(Debug)]
 pub struct MultiSet<T> {
     map: HashMap<T, i32>,
 }
@@ -65,6 +66,8 @@ impl<T: Eq + Hash> PartialEq for MultiSet<T> {
     }
 }
 
+impl<T: Eq + Hash> Eq for MultiSet<T> {}
+
 impl<T: Eq + Hash> PartialOrd for MultiSet<T> {
     fn partial_cmp(&self, other: &MultiSet<T>) -> Option<Ordering> {
         if self == other {
@@ -123,9 +126,7 @@ impl<T: Eq + Hash> Sub for MultiSet<T> {
 impl<T: Eq + Hash + Clone> Clone for MultiSet<T> {
     fn clone(&self) -> Self {
         let mut new_map: MultiSet<T> = MultiSet::new();
-        self.map.clone().into_iter().for_each(|(key, value)| {
-            new_map.repeat_insert(key, value);
-        });
+        new_map.map = self.map.clone();
         new_map
     }
 }
@@ -188,21 +189,21 @@ mod tests {
     fn equal_empty_multisets() {
         let set: MultiSet<i32> = MultiSet::new();
         let other: MultiSet<i32> = MultiSet::new();
-        assert!(set == other);
+        assert_eq!(set, other);
     }
 
     #[test]
     fn equal_multisets() {
         let set: MultiSet<i32> = vec![1, 2, 2, 4].into_iter().collect();
         let other: MultiSet<i32> = vec![4, 2, 1, 2].into_iter().collect();
-        assert!(set == other);
+        assert_eq!(set, other);
     }
 
     #[test]
     fn unequal_multisets() {
         let set: MultiSet<i32> = vec![4, 2, 1, 2].into_iter().collect();
         let other: MultiSet<i32> = vec![4, 2, 2].into_iter().collect();
-        assert!(set != other);
+        assert_ne!(set, other);
     }
 
     #[test]
@@ -225,7 +226,7 @@ mod tests {
         let other: MultiSet<i32> = vec![5, 3].into_iter().collect();
         let expected_set: MultiSet<i32> = vec![5, 5, 3, 2].into_iter().collect();
         let added_set = set + other;
-        assert!(added_set == expected_set);
+        assert_eq!(added_set, expected_set);
     }
 
     #[test]
@@ -234,6 +235,6 @@ mod tests {
         let other: MultiSet<i32> = vec![5, 3].into_iter().collect();
         let expected_set: MultiSet<i32> = vec![2].into_iter().collect();
         let subtracted_set = set - other;
-        assert!(subtracted_set == expected_set);
+        assert_eq!(subtracted_set, expected_set);
     }
 }
