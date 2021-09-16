@@ -26,6 +26,12 @@ pub struct PetriNet<'a> {
     transitions: Vec<Transition<&'a String>>,
 }
 
+impl<'a> PetriNet<'a> {
+    pub fn new(transitions: Vec<Transition<&'a String>>) -> PetriNet<'a> {
+        PetriNet {transitions}
+    }
+}
+
 impl<'a> PredBasis<MultiSet<&'a String>> for PetriNet<'a> {
     fn pred_basis(&self, state: &MultiSet<&'a String>) -> Vec<MultiSet<&'a String>> {
         self.transitions
@@ -70,9 +76,9 @@ mod tests_petri_net {
     use super::PredBasis;
 
     fn compare_unordered_vec<T: Eq + Clone>(first: Vec<T>, second: Vec<T>) -> bool {
-        for i in first {
+        for i in &first {
             let mut found_match = false;
-            for j in second.clone() {
+            for j in &second {
                 if j == i {
                     found_match = true;
                 }
@@ -95,7 +101,7 @@ mod tests_petri_net {
         let second_inputs: MultiSet<&String> = vec![&third_place].into_iter().collect();
         let second_outputs: MultiSet<&String> = vec![&first_place, &second_place].into_iter().collect();
         let second_transition = Transition::new(second_inputs, second_outputs);
-        let petri_net = PetriNet { transitions: vec![first_transition, second_transition] };
+        let petri_net = PetriNet::new(vec![first_transition, second_transition]);
 
         let initial_state: MultiSet<&String> = vec![&second_place, &second_place].into_iter().collect();
         let first_expected_state: MultiSet<&String> = vec![&second_place, &third_place].into_iter().collect();
